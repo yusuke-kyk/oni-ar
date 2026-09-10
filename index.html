@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>AR鬼テスト</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+
+  <!-- MindAR -->
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .guide {
+      position: fixed;
+      z-index: 9999;
+      left: 50%;
+      top: 20px;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 420px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+      font-size: 14px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="guide">
+    👹 AR鬼テスト<br>
+    印刷した画像にカメラを向けてください
+  </div>
+
+  <a-scene
+    mindar-image="
+      imageTargetSrc: ./targets.mind;
+      autoStart: true;
+      uiLoading: yes;
+      uiScanning: yes;
+      uiError: yes;
+    "
+    color-space="sRGB"
+    renderer="
+      colorManagement: true;
+      physicallyCorrectLights
+    "
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    embedded
+  >
+
+    <!-- ARで使う素材 -->
+    <a-assets>
+
+      <img
+        id="oniImage"
+        src="./oni.png"
+      >
+
+    </a-assets>
+
+
+    <!-- カメラ -->
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false"
+    >
+    </a-camera>
+
+
+    <!--
+      targets.mind に登録した
+      1枚目の画像を認識したときに表示
+    -->
+    <a-entity
+      mindar-image-target="targetIndex: 0"
+    >
+
+      <!-- 鬼画像 -->
+      <a-plane
+        src="#oniImage"
+        position="0 0 0"
+        width="1"
+        height="1.4"
+        material="
+          transparent: true;
+          alphaTest: 0.01;
+        "
+      >
+      </a-plane>
+
+    </a-entity>
+
+  </a-scene>
+
+</body>
+</html>
