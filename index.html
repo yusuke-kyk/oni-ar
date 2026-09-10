@@ -41,9 +41,6 @@
     }
 
 
-    /*
-    MindARのカメラ映像
-    */
     video {
       position: fixed !important;
       top: 0 !important;
@@ -55,9 +52,6 @@
     }
 
 
-    /*
-    ARシーン
-    */
     a-scene {
       position: fixed !important;
       top: 0;
@@ -69,34 +63,38 @@
     }
 
 
-    /*
-    A-Frameの描画面
-    */
     .a-canvas {
       background: transparent !important;
     }
 
 
-    /*
-    上部案内
-    */
     .guide {
       position: fixed;
       z-index: 9999;
       left: 50%;
       top: max(20px, env(safe-area-inset-top));
       transform: translateX(-50%);
+
       width: calc(100% - 40px);
       max-width: 420px;
+
       box-sizing: border-box;
+
       padding: 10px 14px;
+
       border-radius: 12px;
+
       background: rgba(0, 0, 0, 0.55);
+
       color: white;
+
       text-align: center;
+
       font-family: sans-serif;
       font-size: 14px;
+
       pointer-events: none;
+
       line-height: 1.5;
     }
 
@@ -109,8 +107,11 @@
 
 
   <div class="guide">
-    👹 AR鬼テスト - 豆腐小僧歩行版<br>
+
+    👹 AR鬼 - 豆腐小僧<br>
+
     認識画像にスマホを向けてください
+
   </div>
 
 
@@ -140,28 +141,48 @@
   >
 
 
-    <!--
-    ==============================
-    画像素材
-    ==============================
-    -->
+    <!-- =========================
+         歩行差分画像
+    ========================== -->
+
     <a-assets>
 
-      <img id="tofu01" src="./tofu01.png" crossorigin="anonymous">
-      <img id="tofu02" src="./tofu02.png" crossorigin="anonymous">
-      <img id="tofu03" src="./tofu03.png" crossorigin="anonymous">
-      <img id="tofu04" src="./tofu04.png" crossorigin="anonymous">
-      <img id="tofu05" src="./tofu05.png" crossorigin="anonymous">
+      <img
+        id="tofu01"
+        src="./tofu01.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu02"
+        src="./tofu02.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu03"
+        src="./tofu03.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu04"
+        src="./tofu04.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu05"
+        src="./tofu05.png"
+        crossorigin="anonymous"
+      >
 
     </a-assets>
 
 
 
-    <!--
-    ==============================
-    カメラ
-    ==============================
-    -->
+    <!-- ARカメラ -->
+
     <a-camera
       position="0 0 0"
       look-controls="enabled: false"
@@ -170,46 +191,51 @@
 
 
 
-    <!--
-    ==============================
-    ターゲット画像
-    targetIndex: 0
-    ==============================
-    -->
+    <!-- 認識画像 -->
+
     <a-entity
       id="imageTarget"
       mindar-image-target="targetIndex: 0"
     >
 
+
       <!--
-      歩く本体の親
-      これ全体を右→左へ移動させる
+      豆腐小僧本体
+
+      開始位置はJavascript側で設定
       -->
+
       <a-entity
         id="walker"
-        position="0.75 -0.18 0.01"
+        position="1 -0.18 0.01"
         visible="false"
       >
 
-        <!--
-        豆腐小僧の差分画像
-        ここだけ差し替えて歩いて見せる
-        -->
+
         <a-image
+
           id="tofuSprite"
+
           src="#tofu01"
+
           width="0.72"
+
           height="1.02"
+
           position="0 0 0"
+
           material="
             transparent: true;
             alphaTest: 0.01;
             side: double;
           "
+
         >
         </a-image>
 
+
       </a-entity>
+
 
     </a-entity>
 
@@ -218,325 +244,602 @@
 
 
 
-  <script>
+<script>
 
-    document.addEventListener(
+document.addEventListener(
 
-      "DOMContentLoaded",
+  "DOMContentLoaded",
+
+  () => {
+
+
+
+    /*
+    ============================================
+    HTML要素
+    ============================================
+    */
+
+
+    const imageTarget =
+      document.getElementById(
+        "imageTarget"
+      );
+
+
+    const walker =
+      document.getElementById(
+        "walker"
+      );
+
+
+    const tofuSprite =
+      document.getElementById(
+        "tofuSprite"
+      );
+
+
+
+    /*
+    ============================================
+    歩行差分
+
+    5枚を何度も繰り返す
+    ============================================
+    */
+
+
+    const frames = [
+
+      "#tofu01",
+      "#tofu02",
+      "#tofu03",
+      "#tofu04",
+      "#tofu05"
+
+    ];
+
+
+
+    /*
+    ============================================
+    ★ここが今回の変更ポイント
+    ============================================
+    */
+
+
+    /*
+    差分切替速度
+
+    130msごとに1枚進む
+    */
+
+    const FRAME_INTERVAL =
+      130;
+
+
+
+    /*
+    歩行時間
+
+    前：
+    3200ms
+
+    今回：
+    6500ms
+    */
+
+    const WALK_DURATION =
+      6500;
+
+
+
+    /*
+    出発地点
+
+    ターゲット中央より
+    少し右側
+    */
+
+    const START_POS = {
+
+      x: 1.0,
+
+      y: -0.18,
+
+      z: 0.01
+
+    };
+
+
+
+    /*
+    終着地点
+
+    前：
+    -0.75
+
+    今回：
+    -2.2
+
+    かなり左まで歩く
+    */
+
+    const END_POS = {
+
+      x: -2.2,
+
+      y: -0.18,
+
+      z: 0.01
+
+    };
+
+
+
+    /*
+    ============================================
+    状態
+    ============================================
+    */
+
+
+    let frameTimer =
+      null;
+
+
+    let finishTimer =
+      null;
+
+
+    let frameIndex =
+      0;
+
+
+    let isAnimating =
+      false;
+
+
+
+    /*
+    ============================================
+    位置設定
+    ============================================
+    */
+
+
+    function setWalkerPosition(
+      pos
+    ) {
+
+
+      walker.setAttribute(
+
+        "position",
+
+        `${pos.x} ${pos.y} ${pos.z}`
+
+      );
+
+
+    }
+
+
+
+    /*
+    ============================================
+    差分を1枚目へ
+    ============================================
+    */
+
+
+    function resetFrame() {
+
+
+      frameIndex =
+        0;
+
+
+      tofuSprite.setAttribute(
+
+        "src",
+
+        frames[0]
+
+      );
+
+
+    }
+
+
+
+    /*
+    ============================================
+    差分ループ開始
+    ============================================
+    */
+
+
+    function startFrameLoop() {
+
+
+      stopFrameLoop();
+
+
+      frameTimer =
+
+        setInterval(
+
+          () => {
+
+
+            frameIndex =
+
+              (
+                frameIndex
+                +
+                1
+              )
+
+              %
+
+              frames.length;
+
+
+
+            tofuSprite.setAttribute(
+
+              "src",
+
+              frames[
+                frameIndex
+              ]
+
+            );
+
+
+          },
+
+          FRAME_INTERVAL
+
+        );
+
+
+    }
+
+
+
+    /*
+    ============================================
+    差分ループ停止
+    ============================================
+    */
+
+
+    function stopFrameLoop() {
+
+
+      if (
+        frameTimer
+      ) {
+
+
+        clearInterval(
+          frameTimer
+        );
+
+
+        frameTimer =
+          null;
+
+
+      }
+
+
+    }
+
+
+
+    /*
+    ============================================
+    豆腐小僧リセット
+    ============================================
+    */
+
+
+    function resetWalker() {
+
+
+      stopFrameLoop();
+
+
+
+      if (
+        finishTimer
+      ) {
+
+
+        clearTimeout(
+          finishTimer
+        );
+
+
+        finishTimer =
+          null;
+
+
+      }
+
+
+
+      walker.removeAttribute(
+        "animation__walk"
+      );
+
+
+
+      setWalkerPosition(
+        START_POS
+      );
+
+
+
+      resetFrame();
+
+
+
+      walker.setAttribute(
+        "visible",
+        false
+      );
+
+
+
+      isAnimating =
+        false;
+
+
+    }
+
+
+
+    /*
+    ============================================
+    歩行開始
+    ============================================
+    */
+
+
+    function startWalking() {
+
+
+      if (
+        isAnimating
+      ) {
+
+        return;
+
+      }
+
+
+
+      isAnimating =
+        true;
+
+
+
+      /*
+      最初の差分へ
+      */
+
+
+      resetFrame();
+
+
+
+      /*
+      スタート地点へ
+      */
+
+
+      setWalkerPosition(
+        START_POS
+      );
+
+
+
+      /*
+      豆腐小僧を出す
+      */
+
+
+      walker.setAttribute(
+        "visible",
+        true
+      );
+
+
+
+      /*
+      歩行差分ループ開始
+      */
+
+
+      startFrameLoop();
+
+
+
+      /*
+      古い移動アニメーション削除
+      */
+
+
+      walker.removeAttribute(
+        "animation__walk"
+      );
+
+
+
+      /*
+      少し待ってから
+      移動開始
+      */
+
+
+      setTimeout(
+
+        () => {
+
+
+          walker.setAttribute(
+
+            "animation__walk",
+
+            `
+
+            property: position;
+
+            from:
+              ${START_POS.x}
+              ${START_POS.y}
+              ${START_POS.z};
+
+            to:
+              ${END_POS.x}
+              ${END_POS.y}
+              ${END_POS.z};
+
+            dur:
+              ${WALK_DURATION};
+
+            easing:
+              linear;
+
+            loop:
+              false;
+
+            `
+
+          );
+
+
+        },
+
+        30
+
+      );
+
+
+
+      /*
+      ========================================
+      歩行終了
+
+      6500ms後に消す
+      ========================================
+      */
+
+
+      finishTimer =
+
+        setTimeout(
+
+          () => {
+
+
+            stopFrameLoop();
+
+
+
+            walker.setAttribute(
+
+              "visible",
+
+              false
+
+            );
+
+
+
+            isAnimating =
+              false;
+
+
+          },
+
+          WALK_DURATION
+
+        );
+
+
+    }
+
+
+
+    /*
+    ============================================
+    ターゲット発見
+    ============================================
+    */
+
+
+    imageTarget.addEventListener(
+
+      "targetFound",
 
       () => {
 
 
-        const imageTarget =
-          document.getElementById(
-            "imageTarget"
-          );
+        resetWalker();
 
 
-        const walker =
-          document.getElementById(
-            "walker"
-          );
+        startWalking();
 
 
-        const tofuSprite =
-          document.getElementById(
-            "tofuSprite"
-          );
+      }
 
+    );
 
 
-        /*
-        ==============================
-        差分画像一覧
-        ==============================
-        */
-        const frames = [
-          "#tofu01",
-          "#tofu02",
-          "#tofu03",
-          "#tofu04",
-          "#tofu05"
-        ];
 
+    /*
+    ============================================
+    ターゲットを見失った場合
+    ============================================
+    */
 
 
-        /*
-        ==============================
-        調整値
-        ==============================
-        */
+    imageTarget.addEventListener(
 
-        // 差分切り替え間隔（小さいほど速い）
-        const FRAME_INTERVAL = 130;
+      "targetLost",
 
-        // 右→左へ歩く時間
-        const WALK_DURATION = 3200;
+      () => {
 
-        // 開始位置
-        const START_POS = {
-          x: 0.75,
-          y: -0.18,
-          z: 0.01
-        };
 
-        // 終了位置
-        const END_POS = {
-          x: -0.75,
-          y: -0.18,
-          z: 0.01
-        };
-
-
-
-        /*
-        ==============================
-        状態管理
-        ==============================
-        */
-        let frameTimer = null;
-        let finishTimer = null;
-        let frameIndex = 0;
-        let isAnimating = false;
-
-
-
-        /*
-        ==============================
-        位置設定
-        ==============================
-        */
-        function setWalkerPosition(pos) {
-
-          walker.setAttribute(
-            "position",
-            `${pos.x} ${pos.y} ${pos.z}`
-          );
-
-        }
-
-
-
-        /*
-        ==============================
-        歩行画像を1枚目に戻す
-        ==============================
-        */
-        function resetFrame() {
-
-          frameIndex = 0;
-
-          tofuSprite.setAttribute(
-            "src",
-            frames[0]
-          );
-
-        }
-
-
-
-        /*
-        ==============================
-        歩行差分ループ開始
-        ==============================
-        */
-        function startFrameLoop() {
-
-          stopFrameLoop();
-
-          frameTimer = setInterval(
-            () => {
-
-              frameIndex =
-                (frameIndex + 1)
-                %
-                frames.length;
-
-              tofuSprite.setAttribute(
-                "src",
-                frames[frameIndex]
-              );
-
-            },
-            FRAME_INTERVAL
-          );
-
-        }
-
-
-
-        /*
-        ==============================
-        歩行差分ループ停止
-        ==============================
-        */
-        function stopFrameLoop() {
-
-          if (frameTimer) {
-            clearInterval(frameTimer);
-            frameTimer = null;
-          }
-
-        }
-
-
-
-        /*
-        ==============================
-        完全リセット
-        ==============================
-        */
-        function resetWalker() {
-
-          stopFrameLoop();
-
-          if (finishTimer) {
-            clearTimeout(finishTimer);
-            finishTimer = null;
-          }
-
-          walker.removeAttribute(
-            "animation__walk"
-          );
-
-          setWalkerPosition(
-            START_POS
-          );
-
-          resetFrame();
-
-          walker.setAttribute(
-            "visible",
-            false
-          );
-
-          isAnimating = false;
-
-        }
-
-
-
-        /*
-        ==============================
-        歩行開始
-        ==============================
-        */
-        function startWalking() {
-
-          if (isAnimating) {
-            return;
-          }
-
-          isAnimating = true;
-
-          resetFrame();
-
-          setWalkerPosition(
-            START_POS
-          );
-
-          walker.setAttribute(
-            "visible",
-            true
-          );
-
-          startFrameLoop();
-
-
-          /*
-          いったん消してから付け直すと
-          アニメーション再生が安定しやすい
-          */
-          walker.removeAttribute(
-            "animation__walk"
-          );
-
-          setTimeout(
-            () => {
-
-              walker.setAttribute(
-                "animation__walk",
-                `
-                property: position;
-                from: ${START_POS.x} ${START_POS.y} ${START_POS.z};
-                to: ${END_POS.x} ${END_POS.y} ${END_POS.z};
-                dur: ${WALK_DURATION};
-                easing: linear;
-                loop: false;
-                `
-              );
-
-            },
-            30
-          );
-
-
-          /*
-          歩き終わったら消える
-          */
-          finishTimer = setTimeout(
-            () => {
-
-              stopFrameLoop();
-
-              walker.setAttribute(
-                "visible",
-                false
-              );
-
-              isAnimating = false;
-
-            },
-            WALK_DURATION
-          );
-
-        }
-
-
-
-        /*
-        ==============================
-        ターゲットを見つけた時
-        ==============================
-        */
-        imageTarget.addEventListener(
-          "targetFound",
-          () => {
-
-            resetWalker();
-            startWalking();
-
-          }
-        );
-
-
-
-        /*
-        ==============================
-        ターゲットを見失った時
-        ==============================
-        */
-        imageTarget.addEventListener(
-          "targetLost",
-          () => {
-
-            resetWalker();
-
-          }
-        );
-
-
-
-        /*
-        最初の初期化
-        */
         resetWalker();
 
 
       }
+
     );
 
-  </script>
+
+
+    /*
+    ============================================
+    初期化
+    ============================================
+    */
+
+
+    resetWalker();
+
+
+  }
+
+);
+
+</script>
 
 
 </body>
