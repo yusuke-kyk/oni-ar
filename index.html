@@ -2,28 +2,48 @@
 <html lang="ja">
 
 <head>
+
   <meta charset="UTF-8">
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    content="width=device-width,
+             initial-scale=1.0,
+             maximum-scale=1.0,
+             user-scalable=no,
+             viewport-fit=cover"
   >
 
-  <title>AR妖怪</title>
+  <title>AR百鬼夜行</title>
 
-  <!-- A-Frame -->
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
 
-  <!-- MindAR -->
-  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image.prod.js"></script>
+  <!-- ======================================================
+       A-Frame 1.5.0
+       ====================================================== -->
 
-  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+  <script
+    src="https://aframe.io/releases/1.5.0/aframe.min.js">
+  </script>
+
+
+  <!-- ======================================================
+       MindAR 1.2.5
+       ====================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js">
+  </script>
 
 
   <style>
 
+    /* ======================================================
+       基本
+       ====================================================== */
+
     html,
     body {
+
       margin: 0;
       padding: 0;
 
@@ -33,10 +53,18 @@
       overflow: hidden;
 
       background: transparent;
+
+      touch-action: none;
+
     }
 
 
+    /* ======================================================
+       カメラ映像
+       ====================================================== */
+
     video {
+
       position: fixed !important;
 
       top: 0 !important;
@@ -48,10 +76,16 @@
       object-fit: cover !important;
 
       z-index: 0 !important;
+
     }
 
 
+    /* ======================================================
+       A-Frame
+       ====================================================== */
+
     a-scene {
+
       position: fixed !important;
 
       top: 0;
@@ -63,145 +97,161 @@
       z-index: 1;
 
       background: transparent !important;
+
     }
 
 
     .a-canvas {
+
       background: transparent !important;
+
     }
 
 
-    /*
-    =========================================
-    上部案内
-    =========================================
-    */
+    /* ======================================================
+       上部メッセージ
+       ====================================================== */
 
-    .guide {
+    #guide {
+
       position: fixed;
 
-      z-index: 9999;
+      z-index: 10000;
 
       left: 50%;
 
-      top:
-        max(
-          16px,
-          env(safe-area-inset-top)
-        );
+      top: max(
+        14px,
+        env(safe-area-inset-top)
+      );
 
-      transform:
-        translateX(-50%);
+      transform: translateX(-50%);
 
-      width:
-        calc(100% - 32px);
+      width: calc(100% - 32px);
 
-      max-width: 460px;
+      max-width: 440px;
 
-      box-sizing:
-        border-box;
+      box-sizing: border-box;
 
-      padding:
-        10px 14px;
+      padding: 9px 14px;
 
-      border-radius:
-        12px;
+      border-radius: 12px;
 
-      background:
-        rgba(0, 0, 0, 0.55);
+      background: rgba(0, 0, 0, 0.55);
 
-      color:
-        white;
+      color: #ffffff;
 
-      text-align:
-        center;
+      text-align: center;
 
       font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        "Yu Gothic",
         sans-serif;
 
-      font-size:
-        14px;
+      font-size: 14px;
 
-      line-height:
-        1.5;
+      line-height: 1.5;
 
-      pointer-events:
-        none;
+      pointer-events: none;
+
+      opacity: 1;
+
+      transition: opacity 0.35s ease;
+
     }
 
 
-    /*
-    =========================================
-    ガシャ髑髏登場時の暗転
-    =========================================
-    */
+    #guide.hide {
+
+      opacity: 0;
+
+    }
+
+
+    /* ======================================================
+       ガシャ髑髏用 暗転
+       ====================================================== */
 
     #darkOverlay {
+
       position: fixed;
 
       inset: 0;
 
-      z-index: 5000;
+      z-index: 8000;
 
-      background:
-        rgba(0, 0, 0, 0);
+      pointer-events: none;
 
-      pointer-events:
-        none;
+      background: rgba(0, 0, 0, 0);
 
       transition:
-        background 0.6s ease;
+        background 1.2s ease;
+
     }
 
 
     #darkOverlay.active {
+
       background:
-        rgba(0, 0, 0, 0.25);
+        rgba(0, 0, 0, 0.28);
+
     }
 
 
-    /*
-    =========================================
-    最後の一瞬の赤フラッシュ
-    =========================================
-    */
+    /* ======================================================
+       ガシャ髑髏
+       最後の赤フラッシュ
+       ====================================================== */
 
     #flashOverlay {
+
       position: fixed;
 
       inset: 0;
 
-      z-index: 6000;
+      z-index: 9000;
+
+      pointer-events: none;
 
       background:
-        rgba(120, 0, 0, 0);
+        rgba(80, 0, 0, 0);
 
-      pointer-events:
-        none;
     }
 
 
     #flashOverlay.flash {
+
       animation:
-        scaryFlash 0.35s ease-out;
+        scaryFlash
+        360ms
+        ease-out;
+
     }
 
 
     @keyframes scaryFlash {
 
       0% {
+
         background:
-          rgba(120, 0, 0, 0);
+          rgba(80, 0, 0, 0);
+
       }
 
-      25% {
+      22% {
+
         background:
-          rgba(120, 0, 0, 0.22);
+          rgba(100, 0, 0, 0.24);
+
       }
 
       100% {
+
         background:
-          rgba(120, 0, 0, 0);
+          rgba(80, 0, 0, 0);
+
       }
 
     }
@@ -214,27 +264,35 @@
 <body>
 
 
+  <!-- ======================================================
+       演出用レイヤー
+       ====================================================== -->
+
   <div id="darkOverlay"></div>
 
   <div id="flashOverlay"></div>
 
 
-  <div class="guide">
+  <div id="guide">
 
-    👹 AR妖怪<br>
-
-    絵や札に
-    スマホを向けてください
+    AR起動中……
 
   </div>
 
 
 
+  <!-- ======================================================
+       AR SCENE
+       ====================================================== -->
+
   <a-scene
 
+    id="arScene"
+
     mindar-image="
-      imageTargetSrc: ./targets.mind;
+      imageTargetSrc: ./targets.mind?v=20260918-1;
       autoStart: true;
+      maxTrack: 2;
       uiLoading: yes;
       uiScanning: yes;
       uiError: yes;
@@ -246,6 +304,7 @@
       colorManagement: true;
       physicallyCorrectLights: true;
       alpha: true;
+      antialias: true;
     "
 
     vr-mode-ui="
@@ -256,42 +315,95 @@
       enabled: false
     "
 
+    embedded
+
   >
 
 
+    <!-- ====================================================
+         画像素材
+         ==================================================== -->
 
-    <!--
-    =========================================
-    素材
-    =========================================
-    -->
-
-    <a-assets>
+    <a-assets timeout="20000">
 
 
-      <!-- 豆腐小僧 -->
+      <!-- ==========================
+           豆腐小僧
+           ========================== -->
 
-      <img id="tofu01" src="./tofu01.png" crossorigin="anonymous">
-      <img id="tofu02" src="./tofu02.png" crossorigin="anonymous">
-      <img id="tofu03" src="./tofu03.png" crossorigin="anonymous">
-      <img id="tofu04" src="./tofu04.png" crossorigin="anonymous">
-      <img id="tofu05" src="./tofu05.png" crossorigin="anonymous">
+      <img
+        id="tofu01"
+        src="./tofu01.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu02"
+        src="./tofu02.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu03"
+        src="./tofu03.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu04"
+        src="./tofu04.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="tofu05"
+        src="./tofu05.png"
+        crossorigin="anonymous"
+      >
 
 
-      <!-- ガシャ髑髏 -->
+      <!-- ==========================
+           ガシャ髑髏
+           ========================== -->
 
-      <img id="gasha01" src="./gasha01.png" crossorigin="anonymous">
-      <img id="gasha02" src="./gasha02.png" crossorigin="anonymous">
-      <img id="gasha03" src="./gasha03.png" crossorigin="anonymous">
-      <img id="gasha04" src="./gasha04.png" crossorigin="anonymous">
-      <img id="gasha05" src="./gasha05.png" crossorigin="anonymous">
+      <img
+        id="gasha01"
+        src="./gasha01.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="gasha02"
+        src="./gasha02.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="gasha03"
+        src="./gasha03.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="gasha04"
+        src="./gasha04.png"
+        crossorigin="anonymous"
+      >
+
+      <img
+        id="gasha05"
+        src="./gasha05.png"
+        crossorigin="anonymous"
+      >
 
 
     </a-assets>
 
 
 
-    <!-- カメラ -->
+    <!-- ====================================================
+         CAMERA
+         ==================================================== -->
 
     <a-camera
 
@@ -301,17 +413,14 @@
         enabled: false
       "
 
-    >
-    </a-camera>
+    ></a-camera>
 
 
 
-    <!--
-    =========================================
-    TARGET 0
-    豆腐小僧
-    =========================================
-    -->
+    <!-- ====================================================
+         TARGET 0
+         豆腐小僧
+         ==================================================== -->
 
     <a-entity
 
@@ -357,8 +466,7 @@
             side: double;
           "
 
-        >
-        </a-image>
+        ></a-image>
 
 
       </a-entity>
@@ -368,12 +476,10 @@
 
 
 
-    <!--
-    =========================================
-    TARGET 1
-    ガシャ髑髏
-    =========================================
-    -->
+    <!-- ====================================================
+         TARGET 1
+         ガシャ髑髏
+         ==================================================== -->
 
     <a-entity
 
@@ -393,7 +499,7 @@
         position="
           0
           -1.25
-          0.01
+          0.02
         "
 
         scale="
@@ -419,15 +525,11 @@
 
           src="#gasha01"
 
-          width="1.3"
+          width="1.30"
 
-          height="1.8"
+          height="1.80"
 
-          position="
-            0
-            0
-            0
-          "
+          position="0 0 0"
 
           material="
             transparent: true;
@@ -435,8 +537,7 @@
             side: double;
           "
 
-        >
-        </a-image>
+        ></a-image>
 
 
       </a-entity>
@@ -445,1054 +546,1206 @@
     </a-entity>
 
 
-
   </a-scene>
 
 
 
-<script>
+  <script>
 
 
-document.addEventListener(
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
 
-  "DOMContentLoaded",
 
-  () => {
+        /* ==================================================
+           ELEMENTS
+           ================================================== */
 
+        const scene =
+          document.getElementById(
+            "arScene"
+          );
 
 
-    /*
-    =========================================
-    要素取得
-    =========================================
-    */
+        const guide =
+          document.getElementById(
+            "guide"
+          );
 
 
-    const tofuTarget =
-      document.getElementById(
-        "tofuTarget"
-      );
+        const darkOverlay =
+          document.getElementById(
+            "darkOverlay"
+          );
 
 
-    const tofuWalker =
-      document.getElementById(
-        "tofuWalker"
-      );
+        const flashOverlay =
+          document.getElementById(
+            "flashOverlay"
+          );
 
 
-    const tofuSprite =
-      document.getElementById(
-        "tofuSprite"
-      );
+        const tofuTarget =
+          document.getElementById(
+            "tofuTarget"
+          );
 
 
-    const gashaTarget =
-      document.getElementById(
-        "gashaTarget"
-      );
+        const tofuWalker =
+          document.getElementById(
+            "tofuWalker"
+          );
 
 
-    const gashaMonster =
-      document.getElementById(
-        "gashaMonster"
-      );
+        const tofuSprite =
+          document.getElementById(
+            "tofuSprite"
+          );
 
 
-    const gashaSprite =
-      document.getElementById(
-        "gashaSprite"
-      );
+        const gashaTarget =
+          document.getElementById(
+            "gashaTarget"
+          );
 
 
-    const darkOverlay =
-      document.getElementById(
-        "darkOverlay"
-      );
+        const gashaMonster =
+          document.getElementById(
+            "gashaMonster"
+          );
 
 
-    const flashOverlay =
-      document.getElementById(
-        "flashOverlay"
-      );
+        const gashaSprite =
+          document.getElementById(
+            "gashaSprite"
+          );
 
 
 
-    /*
-    =========================================
-    豆腐小僧
-    =========================================
-    */
+        /* ==================================================
+           AR起動イベント
+           ================================================== */
 
 
-    const tofuFrames = [
+        scene.addEventListener(
+          "arReady",
+          () => {
 
-      "#tofu01",
-      "#tofu02",
-      "#tofu03",
-      "#tofu04",
-      "#tofu05"
+            console.log(
+              "MindAR ready"
+            );
 
-    ];
 
+            guide.textContent =
+              "絵や札にスマホを向けてください";
 
-    const TOFU_FRAME_INTERVAL =
-      130;
-
-
-    const TOFU_WALK_DURATION =
-      6500;
-
-
-    const TOFU_START_POS = {
-
-      x: 1.0,
-      y: -0.18,
-      z: 0.01
-
-    };
-
-
-    const TOFU_END_POS = {
-
-      x: -2.2,
-      y: -0.18,
-      z: 0.01
-
-    };
-
-
-    let tofuFrameTimer =
-      null;
-
-
-    let tofuFinishTimer =
-      null;
-
-
-    let tofuFrameIndex =
-      0;
-
-
-    let tofuAnimating =
-      false;
-
-
-
-    function setTofuPosition(
-      pos
-    ) {
-
-      tofuWalker.setAttribute(
-
-        "position",
-
-        `${pos.x} ${pos.y} ${pos.z}`
-
-      );
-
-    }
-
-
-
-    function resetTofuFrame() {
-
-      tofuFrameIndex =
-        0;
-
-
-      tofuSprite.setAttribute(
-
-        "src",
-
-        tofuFrames[0]
-
-      );
-
-    }
-
-
-
-    function stopTofuFrameLoop() {
-
-      if (
-        tofuFrameTimer
-      ) {
-
-        clearInterval(
-          tofuFrameTimer
+          }
         );
 
 
-        tofuFrameTimer =
-          null;
-
-      }
-
-    }
-
-
-
-    function startTofuFrameLoop() {
-
-      stopTofuFrameLoop();
-
-
-      tofuFrameTimer =
-
-        setInterval(
-
+        scene.addEventListener(
+          "arError",
           () => {
 
-
-            tofuFrameIndex =
-
-              (
-                tofuFrameIndex
-                +
-                1
-              )
-
-              %
-
-              tofuFrames.length;
+            console.error(
+              "MindAR start error"
+            );
 
 
-            tofuSprite.setAttribute(
+            guide.textContent =
+              "ARの起動に失敗しました。再読み込みしてください。";
 
-              "src",
+          }
+        );
 
-              tofuFrames[
-                tofuFrameIndex
-              ]
+
+
+        /* ==================================================
+           豆腐小僧
+           ================================================== */
+
+
+        const tofuFrames = [
+
+          "#tofu01",
+          "#tofu02",
+          "#tofu03",
+          "#tofu04",
+          "#tofu05"
+
+        ];
+
+
+        const TOFU_FRAME_INTERVAL =
+          130;
+
+
+        const TOFU_WALK_DURATION =
+          6500;
+
+
+        const TOFU_START = {
+
+          x: 1.0,
+          y: -0.18,
+          z: 0.01
+
+        };
+
+
+        const TOFU_END = {
+
+          x: -2.2,
+          y: -0.18,
+          z: 0.01
+
+        };
+
+
+        let tofuFrameIndex =
+          0;
+
+
+        let tofuFrameTimer =
+          null;
+
+
+        let tofuEndTimer =
+          null;
+
+
+        let tofuRunning =
+          false;
+
+
+
+        function setTofuPosition(
+          p
+        ) {
+
+          tofuWalker.setAttribute(
+
+            "position",
+
+            `${p.x} ${p.y} ${p.z}`
+
+          );
+
+        }
+
+
+
+        function stopTofuFrames() {
+
+          if (
+            tofuFrameTimer !== null
+          ) {
+
+            clearInterval(
+              tofuFrameTimer
+            );
+
+
+            tofuFrameTimer =
+              null;
+
+          }
+
+        }
+
+
+
+        function startTofuFrames() {
+
+
+          stopTofuFrames();
+
+
+          tofuFrameTimer =
+
+            setInterval(
+
+              () => {
+
+
+                tofuFrameIndex =
+
+                  (
+                    tofuFrameIndex
+                    +
+                    1
+                  )
+
+                  %
+
+                  tofuFrames.length;
+
+
+                tofuSprite.setAttribute(
+
+                  "src",
+
+                  tofuFrames[
+                    tofuFrameIndex
+                  ]
+
+                );
+
+
+              },
+
+              TOFU_FRAME_INTERVAL
 
             );
 
-          },
-
-          TOFU_FRAME_INTERVAL
-
-        );
-
-    }
+        }
 
 
 
-    function resetTofu() {
-
-      stopTofuFrameLoop();
+        function resetTofu() {
 
 
-      if (
-        tofuFinishTimer
-      ) {
-
-        clearTimeout(
-          tofuFinishTimer
-        );
+          stopTofuFrames();
 
 
-        tofuFinishTimer =
-          null;
+          if (
+            tofuEndTimer !== null
+          ) {
 
-      }
-
-
-      tofuWalker.removeAttribute(
-        "animation__walk"
-      );
+            clearTimeout(
+              tofuEndTimer
+            );
 
 
-      setTofuPosition(
-        TOFU_START_POS
-      );
+            tofuEndTimer =
+              null;
+
+          }
 
 
-      resetTofuFrame();
+          tofuWalker.removeAttribute(
+            "animation__walk"
+          );
 
 
-      tofuWalker.setAttribute(
-        "visible",
-        false
-      );
+          tofuFrameIndex =
+            0;
 
 
-      tofuAnimating =
-        false;
+          tofuSprite.setAttribute(
 
-    }
+            "src",
 
+            tofuFrames[0]
 
-
-    function startTofuWalking() {
-
-      if (
-        tofuAnimating
-      ) {
-
-        return;
-
-      }
+          );
 
 
-      tofuAnimating =
-        true;
-
-
-      resetTofuFrame();
-
-
-      setTofuPosition(
-        TOFU_START_POS
-      );
-
-
-      tofuWalker.setAttribute(
-        "visible",
-        true
-      );
-
-
-      startTofuFrameLoop();
-
-
-      tofuWalker.removeAttribute(
-        "animation__walk"
-      );
-
-
-      setTimeout(
-
-        () => {
+          setTofuPosition(
+            TOFU_START
+          );
 
 
           tofuWalker.setAttribute(
 
-            "animation__walk",
+            "visible",
 
-            `
-            property: position;
-
-            from:
-              ${TOFU_START_POS.x}
-              ${TOFU_START_POS.y}
-              ${TOFU_START_POS.z};
-
-            to:
-              ${TOFU_END_POS.x}
-              ${TOFU_END_POS.y}
-              ${TOFU_END_POS.z};
-
-            dur:
-              ${TOFU_WALK_DURATION};
-
-            easing:
-              linear;
-
-            loop:
-              false;
-            `
+            false
 
           );
 
-        },
 
-        30
+          tofuRunning =
+            false;
 
-      );
-
-
-      tofuFinishTimer =
-
-        setTimeout(
-
-          () => {
+        }
 
 
-            stopTofuFrameLoop();
+
+        function startTofu() {
 
 
-            tofuWalker.setAttribute(
-              "visible",
-              false
+          if (
+            tofuRunning
+          ) {
+
+            return;
+
+          }
+
+
+          tofuRunning =
+            true;
+
+
+          tofuFrameIndex =
+            0;
+
+
+          tofuSprite.setAttribute(
+
+            "src",
+
+            tofuFrames[0]
+
+          );
+
+
+          setTofuPosition(
+            TOFU_START
+          );
+
+
+          tofuWalker.setAttribute(
+
+            "visible",
+
+            true
+
+          );
+
+
+          startTofuFrames();
+
+
+          tofuWalker.removeAttribute(
+            "animation__walk"
+          );
+
+
+          setTimeout(
+
+            () => {
+
+
+              tofuWalker.setAttribute(
+
+                "animation__walk",
+
+                {
+
+                  property:
+                    "position",
+
+                  from:
+                    `${TOFU_START.x} ${TOFU_START.y} ${TOFU_START.z}`,
+
+                  to:
+                    `${TOFU_END.x} ${TOFU_END.y} ${TOFU_END.z}`,
+
+                  dur:
+                    TOFU_WALK_DURATION,
+
+                  easing:
+                    "linear",
+
+                  loop:
+                    false
+
+                }
+
+              );
+
+
+            },
+
+            50
+
+          );
+
+
+          tofuEndTimer =
+
+            setTimeout(
+
+              () => {
+
+
+                stopTofuFrames();
+
+
+                tofuWalker.setAttribute(
+
+                  "visible",
+
+                  false
+
+                );
+
+
+                tofuRunning =
+                  false;
+
+
+              },
+
+              TOFU_WALK_DURATION
+              +
+              100
+
             );
 
+        }
 
-            tofuAnimating =
-              false;
 
-          },
 
-          TOFU_WALK_DURATION
+        /* ==================================================
+           ガシャ髑髏
+           ================================================== */
 
-        );
 
-    }
+        const gashaFrames = [
 
+          "#gasha01",
+          "#gasha02",
+          "#gasha03",
+          "#gasha04",
+          "#gasha05"
 
+        ];
 
-    /*
-    =========================================
-    ガシャ髑髏
-    =========================================
-    */
 
-
-    const gashaFrames = [
-
-      "#gasha01",
-      "#gasha02",
-      "#gasha03",
-      "#gasha04",
-      "#gasha05"
-
-    ];
-
-
-    let gashaTimers = [];
-
-
-    let gashaAnimating =
-      false;
-
-
-
-    function clearGashaTimers() {
-
-      gashaTimers.forEach(
-
-        timer =>
-          clearTimeout(timer)
-
-      );
-
-
-      gashaTimers = [];
-
-    }
-
-
-
-    function showGashaFrame(
-      index
-    ) {
-
-
-      gashaSprite.setAttribute(
-
-        "src",
-
-        gashaFrames[index]
-
-      );
-
-    }
-
-
-
-    /*
-    =========================================
-    ガシャ髑髏リセット
-    =========================================
-    */
-
-
-    function resetGasha() {
-
-
-      clearGashaTimers();
-
-
-      gashaMonster.removeAttribute(
-        "animation__position"
-      );
-
-
-      gashaMonster.removeAttribute(
-        "animation__scale"
-      );
-
-
-      gashaMonster.removeAttribute(
-        "animation__sway"
-      );
-
-
-      gashaMonster.setAttribute(
-
-        "position",
-
-        "0 -1.25 0.01"
-
-      );
-
-
-      gashaMonster.setAttribute(
-
-        "scale",
-
-        "0.25 0.25 0.25"
-
-      );
-
-
-      gashaMonster.setAttribute(
-
-        "rotation",
-
-        "0 0 -2"
-
-      );
-
-
-      showGashaFrame(
-        0
-      );
-
-
-      gashaMonster.setAttribute(
-
-        "visible",
-
-        false
-
-      );
-
-
-      darkOverlay
-        .classList
-        .remove(
-          "active"
-        );
-
-
-      flashOverlay
-        .classList
-        .remove(
-          "flash"
-        );
-
-
-      gashaAnimating =
-        false;
-
-    }
-
-
-
-    /*
-    =========================================
-    怖いガシャ髑髏開始
-    =========================================
-    */
-
-
-    function startGashaScare() {
-
-
-      if (
-        gashaAnimating
-      ) {
-
-        return;
-
-      }
-
-
-      gashaAnimating =
-        true;
-
-
-
-      /*
-      -----------------------------------------
-      STEP 1
-      下からゆっくり現れる
-      -----------------------------------------
-      */
-
-
-      showGashaFrame(
-        0
-      );
-
-
-      gashaMonster.setAttribute(
-        "visible",
-        true
-      );
-
-
-      darkOverlay
-        .classList
-        .add(
-          "active"
-        );
-
-
-      gashaMonster.setAttribute(
-
-        "animation__position",
-
-        `
-        property: position;
-
-        from:
-          0 -1.25 0.01;
-
-        to:
-          0 -0.25 0.01;
-
-        dur:
-          1800;
-
-        easing:
-          easeOutQuad;
-
-        loop:
+        let gashaRunning =
           false;
-        `
-
-      );
 
 
-      gashaMonster.setAttribute(
-
-        "animation__scale",
-
-        `
-        property: scale;
-
-        from:
-          0.25 0.25 0.25;
-
-        to:
-          0.85 0.85 0.85;
-
-        dur:
-          1800;
-
-        easing:
-          easeOutQuad;
-
-        loop:
-          false;
-        `
-
-      );
+        let gashaTimers =
+          [];
 
 
 
-      /*
-      700ms
-      顔＋肩
-      */
+        function addGashaTimer(
+          callback,
+          delay
+        ) {
 
 
-      gashaTimers.push(
+          const timer =
 
-        setTimeout(
+            setTimeout(
 
-          () => {
+              callback,
 
-            showGashaFrame(
-              1
-            );
+              delay
 
-          },
-
-          700
-
-        )
-
-      );
-
-
-
-      /*
-      1300ms
-      上半身
-      */
-
-
-      gashaTimers.push(
-
-        setTimeout(
-
-          () => {
-
-            showGashaFrame(
-              2
-            );
-
-          },
-
-          1300
-
-        )
-
-      );
-
-
-
-      /*
-      -----------------------------------------
-      STEP 2
-      じわじわ近付く
-      -----------------------------------------
-      */
-
-
-      gashaTimers.push(
-
-        setTimeout(
-
-          () => {
-
-
-            showGashaFrame(
-              3
             );
 
 
-            /*
-            左右に不気味に揺れる
-            */
+          gashaTimers.push(
+            timer
+          );
 
-            gashaMonster.setAttribute(
+        }
 
-              "animation__sway",
 
-              `
-              property: rotation;
+
+        function clearGashaTimers() {
+
+
+          gashaTimers.forEach(
+
+            timer => {
+
+              clearTimeout(
+                timer
+              );
+
+            }
+
+          );
+
+
+          gashaTimers = [];
+
+        }
+
+
+
+        function showGashaFrame(
+          number
+        ) {
+
+
+          gashaSprite.setAttribute(
+
+            "src",
+
+            gashaFrames[number]
+
+          );
+
+        }
+
+
+
+        function resetGasha() {
+
+
+          clearGashaTimers();
+
+
+          gashaMonster.removeAttribute(
+            "animation__rise"
+          );
+
+
+          gashaMonster.removeAttribute(
+            "animation__grow"
+          );
+
+
+          gashaMonster.removeAttribute(
+            "animation__sway"
+          );
+
+
+          gashaMonster.removeAttribute(
+            "animation__attackPosition"
+          );
+
+
+          gashaMonster.removeAttribute(
+            "animation__attackScale"
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "position",
+
+            "0 -1.25 0.02"
+
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "scale",
+
+            "0.25 0.25 0.25"
+
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "rotation",
+
+            "0 0 -2"
+
+          );
+
+
+          showGashaFrame(
+            0
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "visible",
+
+            false
+
+          );
+
+
+          darkOverlay
+            .classList
+            .remove(
+              "active"
+            );
+
+
+          flashOverlay
+            .classList
+            .remove(
+              "flash"
+            );
+
+
+          gashaRunning =
+            false;
+
+        }
+
+
+
+        function startGasha() {
+
+
+          if (
+            gashaRunning
+          ) {
+
+            return;
+
+          }
+
+
+          gashaRunning =
+            true;
+
+
+          /* ----------------------------------------------
+             START
+             ---------------------------------------------- */
+
+
+          showGashaFrame(
+            0
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "position",
+
+            "0 -1.25 0.02"
+
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "scale",
+
+            "0.25 0.25 0.25"
+
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "rotation",
+
+            "0 0 -2"
+
+          );
+
+
+          gashaMonster.setAttribute(
+
+            "visible",
+
+            true
+
+          );
+
+
+          darkOverlay
+            .classList
+            .add(
+              "active"
+            );
+
+
+          /* ----------------------------------------------
+             PHASE 1
+
+             下からヌーッ……
+             ---------------------------------------------- */
+
+
+          gashaMonster.setAttribute(
+
+            "animation__rise",
+
+            {
+
+              property:
+                "position",
 
               from:
-                0 0 -2;
+                "0 -1.25 0.02",
 
               to:
-                0 0 2;
+                "0 -0.28 0.02",
 
               dur:
-                260;
-
-              dir:
-                alternate;
+                1900,
 
               easing:
-                easeInOutSine;
+                "easeOutQuad",
 
               loop:
-                true;
-              `
+                false
 
-            );
+            }
 
-
-            /*
-            さらに近付く
-            */
-
-            gashaMonster.removeAttribute(
-              "animation__position"
-            );
+          );
 
 
-            gashaMonster.removeAttribute(
-              "animation__scale"
-            );
+          gashaMonster.setAttribute(
 
+            "animation__grow",
 
-            gashaMonster.setAttribute(
+            {
 
-              "animation__position",
+              property:
+                "scale",
 
-              `
-              property: position;
+              from:
+                "0.25 0.25 0.25",
 
               to:
-                0 0.12 0.01;
+                "0.83 0.83 0.83",
 
               dur:
-                1700;
+                1900,
 
               easing:
-                easeInOutQuad;
+                "easeOutQuad",
 
               loop:
+                false
+
+            }
+
+          );
+
+
+
+          /* 2枚目 */
+
+          addGashaTimer(
+
+            () => {
+
+              showGashaFrame(
+                1
+              );
+
+            },
+
+            650
+
+          );
+
+
+
+          /* 3枚目 */
+
+          addGashaTimer(
+
+            () => {
+
+              showGashaFrame(
+                2
+              );
+
+            },
+
+            1250
+
+          );
+
+
+
+          /* ----------------------------------------------
+             PHASE 2
+
+             こちらを見ながら
+             ゆらゆら近付く
+             ---------------------------------------------- */
+
+
+          addGashaTimer(
+
+            () => {
+
+
+              showGashaFrame(
+                3
+              );
+
+
+              gashaMonster.removeAttribute(
+                "animation__rise"
+              );
+
+
+              gashaMonster.removeAttribute(
+                "animation__grow"
+              );
+
+
+              gashaMonster.setAttribute(
+
+                "animation__sway",
+
+                {
+
+                  property:
+                    "rotation",
+
+                  from:
+                    "0 0 -2",
+
+                  to:
+                    "0 0 2",
+
+                  dur:
+                    320,
+
+                  dir:
+                    "alternate",
+
+                  easing:
+                    "easeInOutSine",
+
+                  loop:
+                    true
+
+                }
+
+              );
+
+
+              gashaMonster.setAttribute(
+
+                "animation__attackPosition",
+
+                {
+
+                  property:
+                    "position",
+
+                  from:
+                    "0 -0.28 0.02",
+
+                  to:
+                    "0 0.08 0.02",
+
+                  dur:
+                    1700,
+
+                  easing:
+                    "easeInOutQuad",
+
+                  loop:
+                    false
+
+                }
+
+              );
+
+
+              gashaMonster.setAttribute(
+
+                "animation__attackScale",
+
+                {
+
+                  property:
+                    "scale",
+
+                  from:
+                    "0.83 0.83 0.83",
+
+                  to:
+                    "1.28 1.28 1.28",
+
+                  dur:
+                    1700,
+
+                  easing:
+                    "easeInOutQuad",
+
+                  loop:
+                    false
+
+                }
+
+              );
+
+
+            },
+
+            1900
+
+          );
+
+
+
+          /* ----------------------------------------------
+             PHASE 3
+
+             最後にズンッ！！
+             ---------------------------------------------- */
+
+
+          addGashaTimer(
+
+            () => {
+
+
+              showGashaFrame(
+                4
+              );
+
+
+              gashaMonster.removeAttribute(
+                "animation__sway"
+              );
+
+
+              gashaMonster.removeAttribute(
+                "animation__attackPosition"
+              );
+
+
+              gashaMonster.removeAttribute(
+                "animation__attackScale"
+              );
+
+
+              /* 赤フラッシュ */
+
+
+              flashOverlay
+                .classList
+                .remove(
+                  "flash"
+                );
+
+
+              void
+                flashOverlay.offsetWidth;
+
+
+              flashOverlay
+                .classList
+                .add(
+                  "flash"
+                );
+
+
+              /* 最後の突進 */
+
+
+              gashaMonster.setAttribute(
+
+                "animation__attackPosition",
+
+                {
+
+                  property:
+                    "position",
+
+                  from:
+                    "0 0.08 0.02",
+
+                  to:
+                    "0 0.28 0.02",
+
+                  dur:
+                    430,
+
+                  easing:
+                    "easeOutExpo",
+
+                  loop:
+                    false
+
+                }
+
+              );
+
+
+              gashaMonster.setAttribute(
+
+                "animation__attackScale",
+
+                {
+
+                  property:
+                    "scale",
+
+                  from:
+                    "1.28 1.28 1.28",
+
+                  to:
+                    "2.05 2.05 2.05",
+
+                  dur:
+                    430,
+
+                  easing:
+                    "easeOutExpo",
+
+                  loop:
+                    false
+
+                }
+
+              );
+
+
+            },
+
+            3650
+
+          );
+
+
+
+          /* ----------------------------------------------
+             演出終了
+             ---------------------------------------------- */
+
+
+          addGashaTimer(
+
+            () => {
+
+              gashaRunning =
                 false;
-              `
 
-            );
+            },
 
+            4300
 
-            gashaMonster.setAttribute(
+          );
 
-              "animation__scale",
-
-              `
-              property: scale;
-
-              to:
-                1.30 1.30 1.30;
-
-              dur:
-                1700;
-
-              easing:
-                easeInOutQuad;
-
-              loop:
-                false;
-              `
-
-            );
-
-          },
-
-          1800
-
-        )
-
-      );
+        }
 
 
 
-      /*
-      -----------------------------------------
-      STEP 3
-      最後に一気に迫る
-      -----------------------------------------
-      */
+        /* ==================================================
+           TARGET FOUND
+           ================================================== */
 
 
-      gashaTimers.push(
+        tofuTarget.addEventListener(
 
-        setTimeout(
+          "targetFound",
 
           () => {
 
 
-            showGashaFrame(
-              4
+            console.log(
+              "TOFU target found"
             );
 
 
-            gashaMonster.removeAttribute(
-              "animation__sway"
+            guide.classList.add(
+              "hide"
             );
 
 
-            gashaMonster.removeAttribute(
-              "animation__position"
-            );
+            resetTofu();
+
+            startTofu();
 
 
-            gashaMonster.removeAttribute(
-              "animation__scale"
-            );
+          }
 
-
-            /*
-            赤フラッシュ
-            */
-
-            flashOverlay
-              .classList
-              .remove(
-                "flash"
-              );
-
-
-            void
-              flashOverlay.offsetWidth;
-
-
-            flashOverlay
-              .classList
-              .add(
-                "flash"
-              );
-
-
-            /*
-            ズンッ！
-            */
-
-            gashaMonster.setAttribute(
-
-              "animation__position",
-
-              `
-              property: position;
-
-              to:
-                0 0.30 0.01;
-
-              dur:
-                450;
-
-              easing:
-                easeOutExpo;
-
-              loop:
-                false;
-              `
-
-            );
-
-
-            gashaMonster.setAttribute(
-
-              "animation__scale",
-
-              `
-              property: scale;
-
-              to:
-                2.05 2.05 2.05;
-
-              dur:
-                450;
-
-              easing:
-                easeOutExpo;
-
-              loop:
-                false;
-              `
-
-            );
-
-          },
-
-          3600
-
-        )
-
-      );
+        );
 
 
 
-      /*
-      -----------------------------------------
-      最後はそのまま残す
-      -----------------------------------------
-      */
+        gashaTarget.addEventListener(
 
-
-      gashaTimers.push(
-
-        setTimeout(
+          "targetFound",
 
           () => {
 
 
-            gashaAnimating =
-              false;
-
-          },
-
-          4300
-
-        )
-
-      );
+            console.log(
+              "GASHA target found"
+            );
 
 
-    }
+            guide.classList.add(
+              "hide"
+            );
+
+
+            resetGasha();
+
+            startGasha();
+
+
+          }
+
+        );
 
 
 
-    /*
-    =========================================
-    豆腐小僧イベント
-    =========================================
-    */
+        /* ==================================================
+           TARGET LOST
+           ================================================== */
 
 
-    tofuTarget.addEventListener(
+        tofuTarget.addEventListener(
 
-      "targetFound",
+          "targetLost",
 
-      () => {
+          () => {
+
+
+            console.log(
+              "TOFU target lost"
+            );
+
+
+            resetTofu();
+
+
+            guide.classList.remove(
+              "hide"
+            );
+
+
+          }
+
+        );
+
+
+
+        gashaTarget.addEventListener(
+
+          "targetLost",
+
+          () => {
+
+
+            console.log(
+              "GASHA target lost"
+            );
+
+
+            resetGasha();
+
+
+            guide.classList.remove(
+              "hide"
+            );
+
+
+          }
+
+        );
+
+
+
+        /* ==================================================
+           初期化
+           ================================================== */
 
 
         resetTofu();
 
-        startTofuWalking();
-
-      }
-
-    );
-
-
-    tofuTarget.addEventListener(
-
-      "targetLost",
-
-      () => {
-
-        resetTofu();
-
-      }
-
-    );
-
-
-
-    /*
-    =========================================
-    ガシャ髑髏イベント
-    =========================================
-    */
-
-
-    gashaTarget.addEventListener(
-
-      "targetFound",
-
-      () => {
-
-
         resetGasha();
 
-        startGashaScare();
 
       }
-
     );
 
 
-    gashaTarget.addEventListener(
-
-      "targetLost",
-
-      () => {
-
-        resetGasha();
-
-      }
-
-    );
-
-
-
-    /*
-    =========================================
-    初期化
-    =========================================
-    */
-
-
-    resetTofu();
-
-    resetGasha();
-
-
-  }
-
-);
-
-</script>
+  </script>
 
 
 </body>
