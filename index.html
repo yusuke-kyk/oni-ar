@@ -30,7 +30,7 @@
 <body>
 <div id="darkOverlay"></div><div id="flashOverlay"></div>
 <div id="guide"><strong>AR百鬼夜行</strong><small>カメラを準備しています…</small></div>
-<div id="help">絵や模造紙にスマホを向けよう</div>
+<div id="help">教室に潜む妖怪を探そう</div>
 <div id="error" role="alert"></div>
 
 <!-- MindARで11枚を「豆腐→ガシャ→緑鬼→付喪神→牛鬼→盥→百鬼夜行→模造紙1～4」の順番でコンパイルした前提です -->
@@ -170,10 +170,10 @@
     } else if(c.kind==='gasha') {
       if(t<1900) {
         const p=ease(clamp(t/1900));
-        y=lerp(-1.25,-0.28,p);s=lerp(0.25,0.83,p);rot=-2;
+        y=lerp(-1.25,-0.28,p);s=lerp(0.25,0.83,p);rot=0; // 回転なし（ラジアン指定による横倒れを防止）
       } else if(t<3650) {
         const p=ease(clamp((t-1900)/1750));
-        y=lerp(-0.28,0.08,p);s=lerp(0.83,1.28,p);rot=Math.sin(t/170)*rad(2);
+        y=lerp(-0.28,0.08,p);s=lerp(0.83,1.28,p);rot=0; // ガシャ髑髏は正面のまま迫る
       } else {
         const p=ease(clamp((t-3650)/430));
         y=lerp(0.08,0.28,p);s=lerp(1.28,2.05,p);
@@ -243,7 +243,7 @@
     const token=trackingToken;
     stopPlayback();active=i;
     const c=cfg[i];
-    say(`${c.name}を発見！`,'妖怪を呼び出しています…');
+    say('妖怪の気配が……','妖怪の姿が……');
     try {
       const images=await loadImages(c);
       if(active!==i || token!==trackingToken) return;
@@ -266,14 +266,14 @@
     active=-1;
     stopPlayback();
     errorBox.style.display='none';
-    say('AR百鬼夜行','絵や札にスマホを向けてください');
+    say('AR百鬼夜行','教室に潜む妖怪を探そう');
   }
   function setup() {
     cfg.forEach(c => {
       anchors[c.idx].addEventListener('targetFound',()=>onFound(c.idx));
       anchors[c.idx].addEventListener('targetLost',()=>onLost(c.idx));
     });
-    scene.addEventListener('arReady',()=>say('AR起動完了！','絵や札にスマホを向けてください'));
+    scene.addEventListener('arReady',()=>say('AR起動完了！','教室に潜む妖怪を探そう'));
     scene.addEventListener('arError',()=>showError('ARが起動できませんでした。targets.mind が正しいファイルか、カメラの許可をご確認ください。'));
     // コンパイル済みデータの取り違えを早期に発見するチェック。
     fetch(`./targets.mind?v=${VERSION}`,{method:'HEAD',cache:'no-store'}).then(r=>{
