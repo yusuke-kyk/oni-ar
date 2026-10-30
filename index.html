@@ -243,7 +243,7 @@
     const token=trackingToken;
     stopPlayback();active=i;
     const c=cfg[i];
-    say('妖怪の気配が……','妖怪の姿が……');
+    say('妖怪の気配が……');
     try {
       const images=await loadImages(c);
       if(active!==i || token!==trackingToken) return;
